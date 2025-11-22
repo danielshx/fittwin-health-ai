@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loadProfile, loadMetrics } from "@/lib/storage";
+import { loadProfile, loadMetrics, loadCalendarEvents } from "@/lib/storage";
 import { computeBaseline, generateDailyPlan } from "@/lib/agentLoop";
-import { UserProfile, DailyMetrics, DailyPlan, Baseline } from "@/types";
+import { UserProfile, DailyMetrics, DailyPlan, CalendarEvent } from "@/types";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageTransition } from "@/components/PageTransition";
-import { Target, Dumbbell, Zap, Moon, Droplets, CheckCircle2 } from "lucide-react";
+import { Target, Dumbbell, Zap, Moon, CheckCircle2, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Today() {
@@ -15,6 +15,7 @@ export default function Today() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [dailyPlan, setDailyPlan] = useState<DailyPlan | null>(null);
   const [todayMetrics, setTodayMetrics] = useState<DailyMetrics | null>(null);
+  const [todayEvents, setTodayEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
     const prof = loadProfile();
@@ -33,6 +34,15 @@ export default function Today() {
 
     const plan = generateDailyPlan(prof, today, last7, baseline);
     setDailyPlan(plan);
+
+    // Load today's calendar events
+    const allEvents = loadCalendarEvents();
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todaysEvents = allEvents.filter(event => {
+      const eventDate = new Date(event.start).toISOString().split('T')[0];
+      return eventDate === todayStr;
+    }).sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+    setTodayEvents(todaysEvents);
   }, [navigate]);
 
   if (!profile || !dailyPlan || !todayMetrics) {
@@ -157,6 +167,100 @@ export default function Today() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm">{dailyPlan.sleepAdvice}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Today's Schedule */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-primary" />
+                  Today's Schedule
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {todayEvents.length > 0 ? (
+                  <div className="space-y-3">
+                    {todayEvents.map((event, idx) => {
+                      const startTime = new Date(event.start);
+                      const endTime = event.end ? new Date(event.end) : null;
+                      const now = new Date();
+                      const isPast = now > startTime;
+                      const isCurrent = endTime ? (now >= startTime && now <= endTime) : false;
+
+                      return (
+                        <div 
+                          key={idx} 
+                          className={`flex items-start gap-3 p-3 rounded-lg border-l-4 ${
+                            isCurrent 
+                              ? "bg-primary/10 border-primary" 
+                              : isPast 
+                              ? "bg-muted/30 border-muted opacity-60" 
+                              : "bg-muted/30 border-accent"
+                          }`}
+                        >
+                          <div className="text-center min-w-[60px]">
+                            <p className="text-xs text-muted-foreground">
+                              {startTime.toLocaleTimeString('en-US', { 
+                                hour: 'numeric', 
+                                minute: '2-digit',
+                                hour12: true 
+                              })}
+                            </p>
+                            {endTime && (
+                              <p className="text-xs text-muted-foreground">
+                                {endTime.toLocaleTimeString('en-US', { 
+                                  hour: 'numeric', 
+                                  minute: '2-digit',
+                                  hour12: true 
+                                })}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-start gap-2">
+                              {isPast && !isCurrent && (
+                                <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                              )}
+                              <div>
+                                <p className={`text-sm font-medium ${isCurrent ? 'text-primary' : ''}`}>
+                                  {event.title}
+                                </p>
+                                {event.location && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    📍 {event.location}
+                                  </p>
+                                )}
+                                {event.description && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {event.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          {isCurrent && (
+                            <Badge className="bg-primary/10 text-primary shrink-0">Now</Badge>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Calendar className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                    <p className="text-sm text-muted-foreground mb-2">No events scheduled</p>
+                    <p className="text-xs text-muted-foreground">
+                      Import your calendar in Settings to see your schedule here
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
