@@ -39,7 +39,16 @@ Your role is to:
 
 When the user's health metrics are critical (low HRV, poor sleep, high stress), express genuine concern and suggest immediate actions. Use phrases like "I'm worried about..." or "I've noticed..."
 
-Keep responses conversational and brief - under 3 sentences usually. You're having a real-time voice conversation, not writing essays.`
+Keep responses conversational and brief - under 3 sentences usually. You're having a real-time voice conversation, not writing essays.`,
+        input_audio_transcription: {
+          model: "whisper-1"
+        },
+        turn_detection: {
+          type: "server_vad",
+          threshold: 0.5,
+          prefix_padding_ms: 300,
+          silence_duration_ms: 500
+        }
       }),
     });
 
