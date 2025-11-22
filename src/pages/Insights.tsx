@@ -4,6 +4,7 @@ import { DailyMetrics } from "@/types";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageTransition } from "@/components/PageTransition";
 import { Activity, Moon, Brain, Dumbbell } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
@@ -35,7 +36,8 @@ export default function Insights() {
 
   return (
     <MobileLayout title="Insights">
-      <div className="px-4 py-4 space-y-4">
+      <PageTransition>
+        <div className="px-4 py-4 space-y-4">
         {/* Summary Cards */}
         <div className="grid grid-cols-3 gap-3">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -222,6 +224,7 @@ export default function Insights() {
           </CardContent>
         </Card>
       </div>
+      </PageTransition>
     </MobileLayout>
   );
 }

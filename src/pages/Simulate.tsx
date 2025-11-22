@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { PageTransition } from "@/components/PageTransition";
 import { TrendingUp, TrendingDown, Brain } from "lucide-react";
 import { motion } from "framer-motion";
 import { UserProfile, DailyMetrics, Baseline } from "@/types";
@@ -57,7 +58,8 @@ export default function Simulate() {
 
   return (
     <MobileLayout title="What-If Simulator">
-      <div className="px-4 py-4 space-y-4">
+      <PageTransition>
+        <div className="px-4 py-4 space-y-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -181,6 +183,7 @@ export default function Simulate() {
           </>
         )}
       </div>
+      </PageTransition>
     </MobileLayout>
   );
 }

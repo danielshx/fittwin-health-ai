@@ -4,6 +4,7 @@ import { DailyMetrics } from "@/types";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageTransition } from "@/components/PageTransition";
 import { Moon, Dumbbell, Coffee, Book, Brain } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -57,7 +58,8 @@ export default function Timeline() {
 
   return (
     <MobileLayout title="Timeline">
-      <div className="px-4 py-4 space-y-4">
+      <PageTransition>
+        <div className="px-4 py-4 space-y-4">
         {metrics.map((metric, idx) => {
           const date = new Date(metric.date);
           const isToday = idx === metrics.length - 1;
@@ -113,6 +115,7 @@ export default function Timeline() {
           );
         })}
       </div>
+      </PageTransition>
     </MobileLayout>
   );
 }

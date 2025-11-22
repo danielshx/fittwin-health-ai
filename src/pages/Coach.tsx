@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CoachSelector } from "@/components/CoachSelector";
+import { PageTransition } from "@/components/PageTransition";
 import { Send, Settings2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { loadCoach } from "@/lib/storage";
@@ -121,7 +122,8 @@ export default function Coach() {
           </Button>
         }
       >
-        <div className="flex flex-col h-[calc(100vh-3.5rem-4rem)]">
+        <PageTransition>
+          <div className="flex flex-col h-[calc(100vh-3.5rem-4rem)]">
           {/* Coach Info Banner */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -206,6 +208,7 @@ export default function Coach() {
             </div>
           </div>
         </div>
+        </PageTransition>
       </MobileLayout>
 
       <CoachSelector

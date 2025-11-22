@@ -9,8 +9,11 @@ import { Button } from "@/components/ui/button";
 import { TwinAvatar } from "@/components/TwinAvatar";
 import { Badge } from "@/components/ui/badge";
 import { AgentRecommendationCard } from "@/components/AgentRecommendationCard";
+import { PullToRefresh } from "@/components/PullToRefresh";
+import { PageTransition } from "@/components/PageTransition";
 import { Heart, Activity, Moon, Zap, TrendingUp, Flame, Shield, Target, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -59,6 +62,15 @@ export default function Dashboard() {
     setRecommendations(recs.slice(-10));
   }, [navigate]);
 
+  const handleRefresh = async () => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    const allMetrics = loadMetrics();
+    setMetrics(allMetrics);
+    const today = allMetrics[allMetrics.length - 1];
+    setTodayMetrics(today);
+    toast.success("Dashboard aktualisiert!");
+  };
+
   const handleAction = (recId: string, action: "accept" | "snooze" | "reject") => {
     const feedbackMap: Record<"accept" | "snooze" | "reject", "accepted" | "snoozed" | "rejected"> = {
       accept: "accepted",
@@ -92,7 +104,9 @@ export default function Dashboard() {
 
   return (
     <MobileLayout title="FitTwin">
-      <div className="px-4 py-6 space-y-6">
+      <PullToRefresh onRefresh={handleRefresh}>
+        <PageTransition>
+          <div className="px-4 py-6 space-y-6">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -297,7 +311,9 @@ export default function Dashboard() {
             </div>
           </Button>
         </div>
-      </div>
+          </div>
+        </PageTransition>
+      </PullToRefresh>
     </MobileLayout>
   );
 }
