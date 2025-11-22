@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
 import Today from "./pages/Today";
 import Recovery from "./pages/Recovery";
+import SleepNegotiator from "./pages/SleepNegotiator";
 import Timeline from "./pages/Timeline";
 import Insights from "./pages/Insights";
 import Coach from "./pages/Coach";
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/today" element={<Today />} />
           <Route path="/recovery" element={<Recovery />} />
+          <Route path="/sleep-negotiator" element={<SleepNegotiator />} />
           <Route path="/timeline" element={<Timeline />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/coach" element={<Coach />} />
