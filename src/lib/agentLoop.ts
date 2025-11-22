@@ -95,12 +95,12 @@ export function generateDailyPlan(
  * Legacy function - now uses the new agent orchestrator
  * @deprecated Use AgentOrchestrator directly for better control
  */
-export function generateRecommendations(
+export async function generateRecommendations(
   profile: UserProfile,
   today: DailyMetrics,
   last7Days: DailyMetrics[],
   baseline: Baseline
-): AgentRecommendation[] {
+): Promise<AgentRecommendation[]> {
   const orchestrator = getAgentOrchestrator();
   
   const context: AgentContext = {
@@ -111,5 +111,5 @@ export function generateRecommendations(
     allMetrics: last7Days,
   };
 
-  return orchestrator.analyze(context);
+  return await orchestrator.analyze(context);
 }
