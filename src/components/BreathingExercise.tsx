@@ -122,15 +122,18 @@ export function BreathingExercise({ type, duration = 5, onComplete }: BreathingE
               className="relative"
             >
               <motion.div
-                className="w-40 h-40 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center"
+                className="w-40 h-40 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-4 border-primary/30"
                 animate={{
-                  scale: phase === "inhale" ? 1.2 : phase === "exhale" ? 0.8 : 1,
+                  scale: phase === "inhale" ? 1.3 : phase === "exhale" ? 0.7 : 1,
                 }}
-                transition={{ duration: currentPattern[phase] }}
+                transition={{ 
+                  duration: currentPattern[phase],
+                  ease: "linear"
+                }}
               >
                 <div className="text-center">
-                  <p className="text-3xl font-bold mb-2">{getPhaseInstructions()}</p>
-                  <p className="text-5xl font-bold text-primary">
+                  <p className="text-2xl font-bold mb-1 text-foreground">{getPhaseInstructions()}</p>
+                  <p className="text-4xl font-bold text-primary">
                     {currentPattern[phase]}s
                   </p>
                 </div>

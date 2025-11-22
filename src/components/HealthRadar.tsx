@@ -80,7 +80,7 @@ export function HealthRadar({ today, baseline, last7Days }: HealthRadarProps) {
                 <p className="text-xs text-muted-foreground">HRV</p>
                 {getTrendIcon(hrvTrend)}
               </div>
-              <p className="text-lg font-semibold">{today.hrv}</p>
+              <p className="text-lg font-semibold">{today.hrv.toFixed(0)}</p>
               <p className="text-xs text-muted-foreground">ms</p>
             </div>
             
@@ -89,7 +89,7 @@ export function HealthRadar({ today, baseline, last7Days }: HealthRadarProps) {
                 <p className="text-xs text-muted-foreground">HR</p>
                 {getTrendIcon(-hrTrend)}
               </div>
-              <p className="text-lg font-semibold">{today.restingHr}</p>
+              <p className="text-lg font-semibold">{today.restingHr.toFixed(0)}</p>
               <p className="text-xs text-muted-foreground">bpm</p>
             </div>
             
