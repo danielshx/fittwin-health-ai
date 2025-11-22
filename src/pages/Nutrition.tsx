@@ -5,10 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Apple, Flame, Droplets, Cookie, Beef, Clock, ChefHat, ExternalLink } from "lucide-react";
+import { Apple, Flame, Droplets, Cookie, Beef, Clock, ChefHat, ExternalLink, Sparkles, Loader2 } from "lucide-react";
 import { loadProfile, loadMetrics } from "@/lib/storage";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Nutrition = () => {
   const profile = loadProfile();
@@ -16,6 +25,10 @@ const Nutrition = () => {
   const today = metrics[metrics.length - 1];
   
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiRecommendations, setAiRecommendations] = useState<string | null>(null);
+  const [showAiDialog, setShowAiDialog] = useState(false);
+  const [userPreferences, setUserPreferences] = useState("");
 
   // Calculate nutrition goals based on profile
   const nutritionGoals = {
@@ -124,14 +137,57 @@ const Nutrition = () => {
     window.open("https://www.lieferando.de/en/", "_blank");
   };
 
-  const handleQuickOrder = () => {
-    toast.success("Quick Order Started", {
-      description: "Your AI agent is finding healthy options on Lieferando based on your goals",
-      action: {
-        label: "View",
-        onClick: handleOrderLieferando,
-      },
-    });
+  const handleQuickOrder = async () => {
+    setShowAiDialog(true);
+    setAiLoading(true);
+    setAiRecommendations(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('nutrition-ai-order', {
+        body: {
+          nutritionGoals,
+          currentIntake,
+          userGoal: profile.goal === "build_muscle" ? "build muscle" : 
+                    profile.goal === "lose_fat" ? "lose fat" : "maintain health",
+          preferences: userPreferences || undefined
+        }
+      });
+
+      if (error) {
+        console.error('Error calling AI function:', error);
+        
+        if (error.message?.includes('Rate limit') || error.message?.includes('429')) {
+          toast.error("Rate Limit", {
+            description: "Too many requests. Please wait a moment and try again.",
+          });
+        } else if (error.message?.includes('credits') || error.message?.includes('402')) {
+          toast.error("AI Credits Exhausted", {
+            description: "Please add credits to your workspace to continue using AI features.",
+          });
+        } else {
+          toast.error("Error", {
+            description: "Failed to get AI recommendations. Please try again.",
+          });
+        }
+        setShowAiDialog(false);
+        return;
+      }
+
+      if (data?.recommendations) {
+        setAiRecommendations(data.recommendations);
+        toast.success("AI Analysis Complete", {
+          description: "Your personalized meal recommendations are ready!",
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Error", {
+        description: "Something went wrong. Please try again.",
+      });
+      setShowAiDialog(false);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   return (
@@ -139,6 +195,60 @@ const Nutrition = () => {
       title="Nutrition"
     >
       <div className="space-y-6 pb-24">
+        {/* AI Order Dialog */}
+        <Dialog open={showAiDialog} onOpenChange={setShowAiDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                AI Nutrition Assistant
+              </DialogTitle>
+              <DialogDescription>
+                Personalized meal recommendations based on your goals
+              </DialogDescription>
+            </DialogHeader>
+            
+            {aiLoading ? (
+              <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                <div className="text-center space-y-2">
+                  <p className="font-medium">Analyzing your nutrition needs...</p>
+                  <p className="text-sm text-muted-foreground">
+                    Finding the best meals for your goals
+                  </p>
+                </div>
+              </div>
+            ) : aiRecommendations ? (
+              <div className="space-y-4">
+                <div className="prose prose-sm max-w-none dark:prose-invert">
+                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {aiRecommendations}
+                  </div>
+                </div>
+                
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button 
+                    onClick={handleOrderLieferando} 
+                    className="flex-1"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Order on Lieferando
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowAiDialog(false);
+                      setUserPreferences("");
+                    }}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+          </DialogContent>
+        </Dialog>
+
         {/* Daily Goals Overview */}
         <Card>
           <CardHeader>
@@ -209,20 +319,53 @@ const Nutrition = () => {
         <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ExternalLink className="w-5 h-5" />
-              No Time to Cook?
+              <Sparkles className="w-5 h-5" />
+              AI-Powered Food Ordering
             </CardTitle>
-            <CardDescription>Let your AI agent help you order healthy meals</CardDescription>
+            <CardDescription>Get personalized meal recommendations from Lieferando</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Button onClick={handleQuickOrder} className="w-full" size="lg">
-              <ChefHat className="w-4 h-4 mr-2" />
-              AI-Assisted Order
-            </Button>
-            <Button onClick={handleOrderLieferando} variant="outline" className="w-full">
-              Open Lieferando
-              <ExternalLink className="w-4 h-4 ml-2" />
-            </Button>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Dietary Preferences (Optional)
+              </label>
+              <Textarea
+                placeholder="E.g., vegetarian, no dairy, loves Asian food..."
+                value={userPreferences}
+                onChange={(e) => setUserPreferences(e.target.value)}
+                className="min-h-[60px]"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleQuickOrder} 
+                className="flex-1" 
+                size="lg"
+                disabled={aiLoading}
+              >
+                {aiLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Get AI Recommendations
+                  </>
+                )}
+              </Button>
+              <Button 
+                onClick={handleOrderLieferando} 
+                variant="outline"
+                disabled={aiLoading}
+              >
+                <ExternalLink className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              AI analyzes your remaining macros and suggests perfect meals
+            </p>
           </CardContent>
         </Card>
 
