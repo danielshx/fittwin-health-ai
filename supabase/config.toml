@@ -1,5 +1,8 @@
 project_id = "facfhfdnvbqaafsrfyxh"
 
+[functions.nutrition-ai-order]
+verify_jwt = false
+
 [functions.realtime-voice]
 verify_jwt = false
 
