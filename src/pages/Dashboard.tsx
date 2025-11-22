@@ -226,49 +226,11 @@ export default function Dashboard() {
               </Card>
             </motion.div>
 
-            {/* Feature Highlights */}
-            <motion.div 
-              className="grid grid-cols-3 gap-3"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.8, duration: 0.6 }}
-            >
-              <Card 
-                className="shadow-card cursor-pointer hover:scale-105 hover:shadow-glow transition-all bg-gradient-to-br from-primary/10 to-transparent"
-                onClick={() => navigate("/nutrition")}
-              >
-                <CardContent className="pt-5 pb-5 text-center">
-                  <Flame className="w-7 h-7 mx-auto mb-2 text-primary" />
-                  <p className="font-bold text-sm">Nutrition</p>
-                </CardContent>
-              </Card>
-
-              <Card 
-                className="shadow-card cursor-pointer hover:scale-105 hover:shadow-glow transition-all bg-gradient-to-br from-accent/10 to-transparent"
-                onClick={() => navigate("/recovery")}
-              >
-                <CardContent className="pt-5 pb-5 text-center">
-                  <Shield className="w-7 h-7 mx-auto mb-2 text-accent" />
-                  <p className="font-bold text-sm">Recovery</p>
-                </CardContent>
-              </Card>
-
-              <Card 
-                className="shadow-card cursor-pointer hover:scale-105 hover:shadow-glow transition-all bg-gradient-to-br from-secondary/10 to-transparent"
-                onClick={() => navigate("/insights")}
-              >
-                <CardContent className="pt-5 pb-5 text-center">
-                  <Target className="w-7 h-7 mx-auto mb-2 text-secondary" />
-                  <p className="font-bold text-sm">Insights</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-
             {/* AI Suggestions */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.1, duration: 0.6 }}
+              transition={{ delay: 1.8, duration: 0.6 }}
             >
               <Card className="shadow-card bg-gradient-to-br from-primary/5 to-transparent">
                 <CardContent className="pt-6">
