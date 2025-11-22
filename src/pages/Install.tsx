@@ -58,8 +58,8 @@ export default function Install() {
           <div className="w-24 h-24 mx-auto mb-4 bg-gradient-wellness rounded-3xl flex items-center justify-center shadow-glow">
             <Heart className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Install FitTwin</h1>
-          <p className="text-muted-foreground">Your AI fitness companion, always with you</p>
+          <h1 className="text-3xl font-bold mb-2">Install HealthTwin</h1>
+          <p className="text-muted-foreground">Your AI health companion, always with you</p>
         </div>
 
         {/* Features */}
@@ -98,7 +98,7 @@ export default function Install() {
               <Check className="w-12 h-12 mx-auto mb-3 text-success" />
               <h3 className="font-bold mb-2">Already Installed!</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                FitTwin is installed on your device. Open it from your home screen.
+                HealthTwin is installed on your device. Open it from your home screen.
               </p>
               <Button className="w-full" onClick={() => navigate("/dashboard")}>
                 Open App

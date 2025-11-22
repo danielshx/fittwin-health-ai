@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       manifest: {
-        name: "FitTwin - AI Fitness & Recovery",
-        short_name: "FitTwin",
-        description: "Your proactive AI digital twin for fitness, recovery, and burnout prevention",
+        name: "HealthTwin - AI Health & Recovery",
+        short_name: "HealthTwin",
+        description: "Your proactive AI digital twin for health, fitness, recovery, and burnout prevention",
         theme_color: "#14b8a6",
         background_color: "#f8fafc",
         display: "standalone",

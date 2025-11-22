@@ -44,7 +44,7 @@ export default function Simulate() {
     const option = options.find((o) => o.value === selectedOption);
     if (!option) return;
 
-    const simulation = simulateWhatIf(option.label, profile, baseline, today);
+    const simulation = simulateWhatIf(option.label, baseline, today);
     setResult(simulation);
   };
 

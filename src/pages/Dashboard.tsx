@@ -106,7 +106,7 @@ export default function Dashboard() {
   const riskConfig = riskColors[burnoutRisk.level];
 
   return (
-    <MobileLayout title="FitTwin">
+    <MobileLayout title="HealthTwin">
       <PullToRefresh onRefresh={handleRefresh}>
         <PageTransition>
           <div className="px-4 py-6 space-y-6">

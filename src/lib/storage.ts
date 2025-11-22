@@ -3,14 +3,14 @@ import { CoachPersonality } from "@/types/coach";
 import { generateMockMetrics, getDefaultProfile } from "./mockData";
 
 const STORAGE_KEYS = {
-  PROFILE: "fittwin_profile",
-  METRICS: "fittwin_metrics",
-  RECOMMENDATIONS: "fittwin_recommendations",
-  FEEDBACK: "fittwin_feedback",
-  CHECKINS: "fittwin_checkins",
-  ACHIEVEMENTS: "fittwin_achievements",
-  COACH: "fittwin_coach",
-  CALENDAR: "fittwin_calendar",
+  PROFILE: "healthtwin_profile",
+  METRICS: "healthtwin_metrics",
+  RECOMMENDATIONS: "healthtwin_recommendations",
+  FEEDBACK: "healthtwin_feedback",
+  CHECKINS: "healthtwin_checkins",
+  ACHIEVEMENTS: "healthtwin_achievements",
+  COACH: "healthtwin_coach",
+  CALENDAR: "healthtwin_calendar",
 };
 
 // Profile

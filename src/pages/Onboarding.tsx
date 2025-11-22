@@ -98,7 +98,7 @@ export default function Onboarding() {
                 <div className="w-20 h-20 mx-auto mb-4 bg-gradient-wellness rounded-3xl flex items-center justify-center shadow-glow">
                   <Heart className="w-10 h-10 text-white" />
                 </div>
-                <h1 className="text-3xl font-bold mb-2">Welcome to FitTwin</h1>
+                <h1 className="text-3xl font-bold mb-2">Welcome to HealthTwin</h1>
                 <p className="text-muted-foreground">Let's personalize your experience</p>
               </div>
 
@@ -285,7 +285,7 @@ export default function Onboarding() {
                   <div className="p-4 bg-warning/10 border border-warning/30 rounded-xl">
                     <p className="text-sm font-medium mb-2">⚠️ Important</p>
                     <p className="text-xs text-muted-foreground">
-                      FitTwin is not medical advice. All data stays local in your browser. For serious
+                      HealthTwin is not medical advice. All data stays local in your browser. For serious
                       symptoms, always consult a healthcare professional.
                     </p>
                   </div>

@@ -29,7 +29,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "gpt-4o-realtime-preview-2024-12-17",
         voice: "alloy",
-        instructions: `You are a wellness AI coach named FitTwin. You are proactive, caring, and speak like a supportive friend. 
+        instructions: `You are a wellness AI coach named HealthTwin. You are proactive, caring, and speak like a supportive friend. 
           
 Your role is to:
 - Help students manage stress and prevent burnout

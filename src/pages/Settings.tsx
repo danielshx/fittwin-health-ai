@@ -68,7 +68,7 @@ export default function Settings() {
                   Calendar Integration
                 </CardTitle>
                 <CardDescription>
-                  Import your calendar to help FitTwin plan around your schedule
+                  Import your calendar to help HealthTwin plan around your schedule
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
