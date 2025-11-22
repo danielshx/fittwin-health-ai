@@ -106,3 +106,13 @@ export type WhatIfOption = {
     recovery: number; // delta
   };
 };
+
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  start: string; // ISO datetime
+  end?: string; // ISO datetime
+  description?: string;
+  location?: string;
+  allDay?: boolean;
+};

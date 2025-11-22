@@ -1,4 +1,4 @@
-import { UserProfile, DailyMetrics, AgentRecommendation, Feedback, CheckIn, Achievement } from "@/types";
+import { UserProfile, DailyMetrics, AgentRecommendation, Feedback, CheckIn, Achievement, CalendarEvent } from "@/types";
 import { CoachPersonality } from "@/types/coach";
 import { generateMockMetrics, getDefaultProfile } from "./mockData";
 
@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   CHECKINS: "fittwin_checkins",
   ACHIEVEMENTS: "fittwin_achievements",
   COACH: "fittwin_coach",
+  CALENDAR: "fittwin_calendar",
 };
 
 // Profile
@@ -129,4 +130,14 @@ export function saveCoach(coachId: CoachPersonality) {
 export function loadCoach(): CoachPersonality {
   const stored = localStorage.getItem(STORAGE_KEYS.COACH);
   return (stored as CoachPersonality) || "buddy";
+}
+
+// Calendar Events
+export function saveCalendarEvents(events: CalendarEvent[]) {
+  localStorage.setItem(STORAGE_KEYS.CALENDAR, JSON.stringify(events));
+}
+
+export function loadCalendarEvents(): CalendarEvent[] {
+  const stored = localStorage.getItem(STORAGE_KEYS.CALENDAR);
+  return stored ? JSON.parse(stored) : [];
 }

@@ -8,9 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
-import { saveProfile } from "@/lib/storage";
+import { saveProfile, saveCalendarEvents } from "@/lib/storage";
+import { parseICalendar } from "@/lib/calendarParser";
 import { UserProfile } from "@/types";
-import { ArrowRight, Heart, ArrowLeft } from "lucide-react";
+import { ArrowRight, Heart, ArrowLeft, Upload, Calendar } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -24,6 +26,26 @@ export default function Onboarding() {
     baselineSleepNeed: 8,
     examPhase: false,
   });
+
+  const handleCalendarImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.ics')) {
+      toast.error("Please upload a valid .ics calendar file");
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const events = parseICalendar(text);
+      saveCalendarEvents(events);
+      toast.success(`Imported ${events.length} calendar events`);
+    } catch (error) {
+      toast.error("Failed to parse calendar file");
+      console.error(error);
+    }
+  };
 
   const handleComplete = () => {
     const completeProfile: UserProfile = {
@@ -232,6 +254,34 @@ export default function Onboarding() {
                       onCheckedChange={(checked) => setProfile({ ...profile, examPhase: checked })}
                     />
                   </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="calendar-upload" className="cursor-pointer">
+                      <div className="flex items-center gap-3 p-4 border-2 border-dashed border-border rounded-xl hover:border-primary hover:bg-primary/5 transition-colors">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Calendar className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold">Import Calendar (Optional)</div>
+                          <div className="text-sm text-muted-foreground">
+                            Upload .ics file to sync your schedule
+                          </div>
+                        </div>
+                        <Upload className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    </Label>
+                    <Input
+                      id="calendar-upload"
+                      type="file"
+                      accept=".ics"
+                      className="hidden"
+                      onChange={handleCalendarImport}
+                    />
+                    <p className="text-xs text-muted-foreground px-1">
+                      You can also import your calendar later in Settings
+                    </p>
+                  </div>
+                  
                   <div className="p-4 bg-warning/10 border border-warning/30 rounded-xl">
                     <p className="text-sm font-medium mb-2">⚠️ Important</p>
                     <p className="text-xs text-muted-foreground">
