@@ -87,6 +87,12 @@ export function generateMockCalendar(): CalendarEvent[] {
     { title: "Sprint Planning", duration: 90, startHour: 10 },
     { title: "1-on-1 with Manager", duration: 30, startHour: 16 },
     { title: "Design Review", duration: 60, startHour: 11 },
+    { title: "All-Hands Meeting", duration: 60, startHour: 10 },
+    { title: "Code Review Session", duration: 45, startHour: 13 },
+    { title: "Department Sync", duration: 30, startHour: 14 },
+    { title: "Product Demo", duration: 45, startHour: 11 },
+    { title: "Technical Workshop", duration: 120, startHour: 13 },
+    { title: "Strategy Meeting", duration: 90, startHour: 14 },
   ];
   
   const workoutEvents = [
@@ -94,6 +100,10 @@ export function generateMockCalendar(): CalendarEvent[] {
     { title: "Gym Session", duration: 60, startHour: 18, type: "workout" },
     { title: "Yoga Class", duration: 60, startHour: 19, type: "workout" },
     { title: "HIIT Training", duration: 30, startHour: 6, type: "workout" },
+    { title: "Swimming", duration: 60, startHour: 7, type: "workout" },
+    { title: "Pilates Class", duration: 60, startHour: 18, type: "workout" },
+    { title: "Cycling", duration: 75, startHour: 7, type: "workout" },
+    { title: "Boxing Class", duration: 60, startHour: 19, type: "workout" },
   ];
   
   const personalEvents = [
@@ -102,6 +112,28 @@ export function generateMockCalendar(): CalendarEvent[] {
     { title: "Grocery Shopping", duration: 60, startHour: 17 },
     { title: "Coffee Chat", duration: 45, startHour: 15 },
     { title: "Dentist Appointment", duration: 60, startHour: 10 },
+    { title: "Physical Therapy", duration: 60, startHour: 16 },
+    { title: "Car Service", duration: 90, startHour: 9 },
+    { title: "Haircut", duration: 45, startHour: 11 },
+    { title: "Package Pickup", duration: 30, startHour: 17 },
+    { title: "Bank Appointment", duration: 45, startHour: 14 },
+  ];
+  
+  const socialEvents = [
+    { title: "Dinner with Family", duration: 120, startHour: 18 },
+    { title: "Movie Night", duration: 150, startHour: 19 },
+    { title: "Birthday Party", duration: 180, startHour: 18 },
+    { title: "Concert", duration: 180, startHour: 20 },
+    { title: "Game Night", duration: 120, startHour: 19 },
+    { title: "Happy Hour", duration: 90, startHour: 17 },
+    { title: "Brunch", duration: 120, startHour: 11 },
+  ];
+  
+  const learningEvents = [
+    { title: "Online Course: React", duration: 90, startHour: 20 },
+    { title: "Spanish Class", duration: 60, startHour: 18 },
+    { title: "Book Club Meeting", duration: 90, startHour: 19 },
+    { title: "Photography Workshop", duration: 120, startHour: 14 },
   ];
   
   const examEvents = [
@@ -125,7 +157,7 @@ export function generateMockCalendar(): CalendarEvent[] {
     if (!isWeekend) {
       // Morning workout (3x per week)
       if ([1, 3, 5].includes(dayOfWeek) && Math.random() > 0.3) {
-        const workout = workoutEvents[Math.floor(Math.random() * 2)];
+        const workout = workoutEvents[Math.floor(Math.random() * workoutEvents.length)];
         const startTime = new Date(date);
         startTime.setHours(workout.startHour, 0, 0, 0);
         const endTime = new Date(startTime);
@@ -140,8 +172,23 @@ export function generateMockCalendar(): CalendarEvent[] {
         });
       }
       
-      // Work events (2-3 per day)
-      const numWorkEvents = Math.floor(Math.random() * 2) + 2;
+      // Lunch break (most days)
+      if (Math.random() > 0.3) {
+        const startTime = new Date(date);
+        startTime.setHours(12, 0, 0, 0);
+        const endTime = new Date(startTime);
+        endTime.setMinutes(endTime.getMinutes() + 60);
+        
+        events.push({
+          id: `event_${eventId++}`,
+          title: Math.random() > 0.5 ? "Lunch Break" : "Team Lunch",
+          start: startTime.toISOString(),
+          end: endTime.toISOString(),
+        });
+      }
+      
+      // Work events (3-5 per day)
+      const numWorkEvents = Math.floor(Math.random() * 3) + 3;
       const shuffledWork = [...workEvents].sort(() => Math.random() - 0.5);
       
       for (let j = 0; j < numWorkEvents; j++) {
@@ -162,7 +209,7 @@ export function generateMockCalendar(): CalendarEvent[] {
       
       // Evening workout (2x per week)
       if ([2, 4].includes(dayOfWeek) && Math.random() > 0.4) {
-        const workout = workoutEvents[2 + Math.floor(Math.random() * 2)];
+        const workout = workoutEvents[Math.floor(Math.random() * workoutEvents.length)];
         const startTime = new Date(date);
         startTime.setHours(workout.startHour, 0, 0, 0);
         const endTime = new Date(startTime);
@@ -174,6 +221,55 @@ export function generateMockCalendar(): CalendarEvent[] {
           start: startTime.toISOString(),
           end: endTime.toISOString(),
           description: "Evening training session",
+        });
+      }
+      
+      // Personal appointments (scattered throughout the week)
+      if (Math.random() > 0.6) {
+        const personal = personalEvents[Math.floor(Math.random() * personalEvents.length)];
+        const startTime = new Date(date);
+        startTime.setHours(personal.startHour, 0, 0, 0);
+        const endTime = new Date(startTime);
+        endTime.setMinutes(endTime.getMinutes() + personal.duration);
+        
+        events.push({
+          id: `event_${eventId++}`,
+          title: personal.title,
+          start: startTime.toISOString(),
+          end: endTime.toISOString(),
+        });
+      }
+      
+      // Learning/development (2x per week)
+      if ([2, 4].includes(dayOfWeek) && Math.random() > 0.5) {
+        const learning = learningEvents[Math.floor(Math.random() * learningEvents.length)];
+        const startTime = new Date(date);
+        startTime.setHours(learning.startHour, 0, 0, 0);
+        const endTime = new Date(startTime);
+        endTime.setMinutes(endTime.getMinutes() + learning.duration);
+        
+        events.push({
+          id: `event_${eventId++}`,
+          title: learning.title,
+          start: startTime.toISOString(),
+          end: endTime.toISOString(),
+          description: "Personal development",
+        });
+      }
+      
+      // Evening social (1-2x per week)
+      if ([3, 5].includes(dayOfWeek) && Math.random() > 0.6) {
+        const social = socialEvents[Math.floor(Math.random() * socialEvents.length)];
+        const startTime = new Date(date);
+        startTime.setHours(social.startHour, 0, 0, 0);
+        const endTime = new Date(startTime);
+        endTime.setMinutes(endTime.getMinutes() + social.duration);
+        
+        events.push({
+          id: `event_${eventId++}`,
+          title: social.title,
+          start: startTime.toISOString(),
+          end: endTime.toISOString(),
         });
       }
       
@@ -195,12 +291,12 @@ export function generateMockCalendar(): CalendarEvent[] {
         });
       }
     } else {
-      // Weekend schedule - more relaxed
-      // Weekend workout
-      if (Math.random() > 0.4) {
+      // Weekend schedule - more relaxed but still full
+      // Weekend workout (morning)
+      if (Math.random() > 0.3) {
         const workout = workoutEvents[Math.floor(Math.random() * workoutEvents.length)];
         const startTime = new Date(date);
-        startTime.setHours(workout.startHour + 1, 0, 0, 0); // Later on weekends
+        startTime.setHours(workout.startHour + 1, 30, 0, 0); // Later on weekends
         const endTime = new Date(startTime);
         endTime.setMinutes(endTime.getMinutes() + workout.duration);
         
@@ -213,11 +309,27 @@ export function generateMockCalendar(): CalendarEvent[] {
         });
       }
       
-      // Personal/social events
+      // Brunch or lunch social event
+      if (Math.random() > 0.4) {
+        const social = dayOfWeek === 0 ? socialEvents[6] : socialEvents[Math.floor(Math.random() * 3)]; // Brunch on Sunday
+        const startTime = new Date(date);
+        startTime.setHours(social.startHour, 0, 0, 0);
+        const endTime = new Date(startTime);
+        endTime.setMinutes(endTime.getMinutes() + social.duration);
+        
+        events.push({
+          id: `event_${eventId++}`,
+          title: social.title,
+          start: startTime.toISOString(),
+          end: endTime.toISOString(),
+        });
+      }
+      
+      // Personal errands/appointments
       if (Math.random() > 0.5) {
         const personal = personalEvents[Math.floor(Math.random() * personalEvents.length)];
         const startTime = new Date(date);
-        startTime.setHours(personal.startHour, 0, 0, 0);
+        startTime.setHours(personal.startHour + 1, 0, 0, 0);
         const endTime = new Date(startTime);
         endTime.setMinutes(endTime.getMinutes() + personal.duration);
         
@@ -226,6 +338,38 @@ export function generateMockCalendar(): CalendarEvent[] {
           title: personal.title,
           start: startTime.toISOString(),
           end: endTime.toISOString(),
+        });
+      }
+      
+      // Weekend social activities (Saturday evening)
+      if (dayOfWeek === 6 && Math.random() > 0.4) {
+        const social = socialEvents[Math.floor(Math.random() * (socialEvents.length - 1))];
+        const startTime = new Date(date);
+        startTime.setHours(social.startHour, 0, 0, 0);
+        const endTime = new Date(startTime);
+        endTime.setMinutes(endTime.getMinutes() + social.duration);
+        
+        events.push({
+          id: `event_${eventId++}`,
+          title: social.title,
+          start: startTime.toISOString(),
+          end: endTime.toISOString(),
+        });
+      }
+      
+      // Sunday relaxation or hobby time
+      if (dayOfWeek === 0 && Math.random() > 0.5) {
+        const startTime = new Date(date);
+        startTime.setHours(15, 0, 0, 0);
+        const endTime = new Date(startTime);
+        endTime.setMinutes(endTime.getMinutes() + 120);
+        
+        events.push({
+          id: `event_${eventId++}`,
+          title: "Hobby Time",
+          start: startTime.toISOString(),
+          end: endTime.toISOString(),
+          description: "Personal project work",
         });
       }
     }
