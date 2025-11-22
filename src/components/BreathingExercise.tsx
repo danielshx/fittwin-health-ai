@@ -16,6 +16,7 @@ export function BreathingExercise({ type, duration = 5, onComplete }: BreathingE
   const [phase, setPhase] = useState<"inhale" | "hold" | "exhale" | "pause">("inhale");
   const [timeRemaining, setTimeRemaining] = useState(duration * 60);
   const [cycleCount, setCycleCount] = useState(0);
+  const [phaseTimeLeft, setPhaseTimeLeft] = useState(0);
 
   const patterns = {
     coherent: { inhale: 5, hold: 0, exhale: 5, pause: 0 }, // 5-5 breathing
@@ -27,6 +28,9 @@ export function BreathingExercise({ type, duration = 5, onComplete }: BreathingE
 
   useEffect(() => {
     if (!isActive) return;
+
+    // Set initial phase time when phase changes
+    setPhaseTimeLeft(currentPattern[phase]);
 
     const phaseTimer = setTimeout(() => {
       if (phase === "inhale" && currentPattern.hold > 0) setPhase("hold");
@@ -41,6 +45,17 @@ export function BreathingExercise({ type, duration = 5, onComplete }: BreathingE
 
     return () => clearTimeout(phaseTimer);
   }, [isActive, phase, currentPattern]);
+
+  // Phase countdown timer
+  useEffect(() => {
+    if (!isActive || phaseTimeLeft <= 0) return;
+
+    const phaseCountdown = setInterval(() => {
+      setPhaseTimeLeft((t) => Math.max(0, t - 1));
+    }, 1000);
+
+    return () => clearInterval(phaseCountdown);
+  }, [isActive, phaseTimeLeft]);
 
   useEffect(() => {
     if (!isActive || timeRemaining <= 0) return;
@@ -79,6 +94,7 @@ export function BreathingExercise({ type, duration = 5, onComplete }: BreathingE
     setPhase("inhale");
     setTimeRemaining(duration * 60);
     setCycleCount(0);
+    setPhaseTimeLeft(0);
   };
 
   const getPhaseInstructions = () => {
@@ -133,9 +149,10 @@ export function BreathingExercise({ type, duration = 5, onComplete }: BreathingE
               >
                 <div className="text-center">
                   <p className="text-2xl font-bold mb-1 text-foreground">{getPhaseInstructions()}</p>
-                  <p className="text-4xl font-bold text-primary">
-                    {currentPattern[phase]}s
+                  <p className="text-5xl font-bold text-primary">
+                    {isActive ? phaseTimeLeft : currentPattern[phase]}
                   </p>
+                  <p className="text-sm text-muted-foreground">seconds</p>
                 </div>
               </motion.div>
             </motion.div>
