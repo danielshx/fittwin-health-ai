@@ -10,7 +10,7 @@ import { TwinAvatar } from "@/components/TwinAvatar";
 import { Badge } from "@/components/ui/badge";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { PageTransition } from "@/components/PageTransition";
-import { Heart, Activity, Moon, Zap, Flame, Shield, Target, Calendar as CalendarIcon, Clock, MessageCircle, Video } from "lucide-react";
+import { Heart, Activity, Moon, Zap, Flame, Shield, Target, Calendar as CalendarIcon, Clock, MessageCircle, Video, CalendarPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
@@ -77,6 +77,11 @@ export default function Dashboard() {
     const today = allMetrics[allMetrics.length - 1];
     setTodayMetrics(today);
     toast.success("Dashboard aktualisiert!");
+  };
+
+  const handleAddToCalendar = (recommendation: AgentRecommendation) => {
+    // In a real implementation, this would create a calendar event
+    toast.success(`"${recommendation.title}" zum Kalender hinzugefügt!`);
   };
 
   if (!profile || !todayMetrics || !readiness || !burnoutRisk) {
@@ -241,16 +246,29 @@ export default function Dashboard() {
                   <div className="space-y-3">
                     {recommendations.slice(0, 3).map((rec) => (
                       <div key={rec.id} className="p-3 bg-background/80 rounded-lg backdrop-blur-sm">
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <p className="text-sm font-semibold flex-1">{rec.title}</p>
-                          <Badge 
-                            variant={rec.priority === "high" ? "destructive" : rec.priority === "medium" ? "default" : "secondary"}
-                            className="text-xs"
-                          >
-                            {rec.priority}
-                          </Badge>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-sm font-semibold">{rec.title}</p>
+                              <Badge 
+                                variant={rec.priority === "high" ? "destructive" : rec.priority === "medium" ? "default" : "secondary"}
+                                className="text-xs"
+                              >
+                                {rec.priority}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">{rec.rationale}</p>
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">{rec.rationale}</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-2 gap-2"
+                          onClick={() => handleAddToCalendar(rec)}
+                        >
+                          <CalendarPlus className="w-4 h-4" />
+                          Add to Calendar
+                        </Button>
                       </div>
                     ))}
                   </div>
