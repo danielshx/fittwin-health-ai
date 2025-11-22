@@ -17,9 +17,9 @@ export interface AIAgent {
   /**
    * Main analysis method - each agent analyzes data and returns recommendations
    * @param context - All the data the agent needs to make decisions
-   * @returns Array of recommendations from this agent
+   * @returns Array of recommendations from this agent (can be async for AWS agents)
    */
-  analyze(context: AgentContext): AgentRecommendation[];
+  analyze(context: AgentContext): AgentRecommendation[] | Promise<AgentRecommendation[]>;
 }
 
 /**

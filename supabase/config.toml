@@ -2,3 +2,15 @@ project_id = "facfhfdnvbqaafsrfyxh"
 
 [functions.realtime-voice]
 verify_jwt = false
+
+[functions.aws-bedrock-chat]
+verify_jwt = true
+
+[functions.s3-upload]
+verify_jwt = true
+
+[functions.s3-download]
+verify_jwt = true
+
+[functions.s3-list]
+verify_jwt = true

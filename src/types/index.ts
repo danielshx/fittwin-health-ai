@@ -34,7 +34,8 @@ export type AgentType =
   | "BreathingCoachAgent"
   | "SleepEnvironmentAgent"
   | "RecoveryPredictionAgent"
-  | "InjuryRiskAgent";
+  | "InjuryRiskAgent"
+  | "AWSBedrockAgent";
 
 export type AgentRecommendation = {
   id: string;

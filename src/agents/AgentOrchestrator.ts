@@ -90,14 +90,14 @@ export class AgentOrchestrator {
    * @param context - The context data for analysis
    * @returns Combined recommendations from all agents
    */
-  analyze(context: AgentContext): AgentRecommendation[] {
+  async analyze(context: AgentContext): Promise<AgentRecommendation[]> {
     console.log(`[AgentOrchestrator] Running analysis with ${this.agents.length} agents`);
     
     const allRecommendations: AgentRecommendation[] = [];
 
     for (const agent of this.agents) {
       try {
-        const recommendations = agent.analyze(context);
+        const recommendations = await Promise.resolve(agent.analyze(context));
         allRecommendations.push(...recommendations);
         console.log(`[AgentOrchestrator] ${agent.name} generated ${recommendations.length} recommendations`);
       } catch (error) {
