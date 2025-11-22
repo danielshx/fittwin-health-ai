@@ -37,13 +37,22 @@ Current situation:
 - Remaining carbs needed: ${remaining.carbs}g
 - Remaining fats needed: ${remaining.fats}g
 
-Provide 3-5 specific meal recommendations with:
-1. Restaurant type/name suggestions (e.g., "Asian fusion restaurant", "Mediterranean grill", etc.)
-2. Specific dish recommendations
-3. Approximate macro breakdown for each meal
-4. Brief reasoning why it fits their goals
+You MUST respond with a JSON array of meal recommendations. Each recommendation must have this exact structure:
+{
+  "restaurantType": "Type of restaurant (e.g., Mediterranean Grill, Asian Fusion)",
+  "dishName": "Specific dish name",
+  "description": "Brief description of the dish",
+  "calories": 600,
+  "protein": 50,
+  "carbs": 55,
+  "fats": 20,
+  "reasoning": "Why this fits their goals",
+  "ingredients": ["ingredient1", "ingredient2", "ingredient3", "ingredient4", "ingredient5"]
+}
 
-Keep it concise and practical. Focus on meals available on typical Lieferando restaurants in Germany.`;
+Provide 3-4 recommendations. Focus on meals available on typical Lieferando restaurants in Germany. Include key ingredients list for each dish (5-8 main ingredients).
+
+RESPOND ONLY WITH THE JSON ARRAY, NO OTHER TEXT.`;
 
     const userPrompt = `I need to order food from Lieferando but want to stay on track with my nutrition goals. 
 I still need ${remaining.calories} calories, ${remaining.protein}g protein, ${remaining.carbs}g carbs, and ${remaining.fats}g fats today.
@@ -66,6 +75,7 @@ What should I order?`;
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.7,
+        response_format: { type: "json_object" }
       }),
     });
 
@@ -91,14 +101,27 @@ What should I order?`;
     }
 
     const data = await response.json();
-    const recommendations = data.choices[0].message.content;
+    const rawContent = data.choices[0].message.content;
+    
+    let meals;
+    try {
+      // Try to parse as JSON
+      const parsed = JSON.parse(rawContent);
+      // Handle both direct array and object with array property
+      meals = Array.isArray(parsed) ? parsed : (parsed.meals || parsed.recommendations || []);
+    } catch (e) {
+      console.error('Failed to parse AI response as JSON:', e);
+      // Fallback: return raw content
+      meals = [];
+    }
 
-    console.log('AI recommendations generated successfully');
+    console.log('AI recommendations generated successfully', meals.length, 'meals');
 
     return new Response(
       JSON.stringify({ 
-        recommendations,
+        meals,
         remaining,
+        rawContent: meals.length === 0 ? rawContent : undefined,
         timestamp: new Date().toISOString()
       }),
       { 

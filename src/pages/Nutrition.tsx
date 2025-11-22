@@ -26,7 +26,8 @@ const Nutrition = () => {
   
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiRecommendations, setAiRecommendations] = useState<string | null>(null);
+  const [aiMeals, setAiMeals] = useState<any[]>([]);
+  const [aiRawContent, setAiRawContent] = useState<string | null>(null);
   const [showAiDialog, setShowAiDialog] = useState(false);
   const [userPreferences, setUserPreferences] = useState("");
 
@@ -129,18 +130,12 @@ const Nutrition = () => {
     }
   ];
 
-  const handleOrderLieferando = () => {
-    toast.info("Opening Lieferando...", {
-      description: "Redirecting you to order healthy meals",
-    });
-    // Open Lieferando with healthy food filters
-    window.open("https://www.lieferando.de/en/", "_blank");
-  };
 
   const handleQuickOrder = async () => {
     setShowAiDialog(true);
     setAiLoading(true);
-    setAiRecommendations(null);
+    setAiMeals([]);
+    setAiRawContent(null);
 
     try {
       const { data, error } = await supabase.functions.invoke('nutrition-ai-order', {
@@ -173,10 +168,15 @@ const Nutrition = () => {
         return;
       }
 
-      if (data?.recommendations) {
-        setAiRecommendations(data.recommendations);
+      if (data?.meals && data.meals.length > 0) {
+        setAiMeals(data.meals);
         toast.success("AI Analysis Complete", {
           description: "Your personalized meal recommendations are ready!",
+        });
+      } else if (data?.rawContent) {
+        setAiRawContent(data.rawContent);
+        toast.success("Recommendations Ready", {
+          description: "View your meal suggestions below",
         });
       }
     } catch (error) {
@@ -190,6 +190,21 @@ const Nutrition = () => {
     }
   };
 
+  const handleOrderLieferando = (searchTerm?: string) => {
+    const url = searchTerm 
+      ? `https://www.lieferando.de/en/search?query=${encodeURIComponent(searchTerm)}`
+      : "https://www.lieferando.de/en/";
+    window.open(url, "_blank");
+  };
+
+  const handleOrderFlink = (ingredients: string[]) => {
+    const searchQuery = ingredients.join(" ");
+    toast.info("Opening Flink...", {
+      description: "Searching for ingredients to prepare this meal",
+    });
+    window.open(`https://www.goflink.com/en-de/search?query=${encodeURIComponent(searchQuery)}`, "_blank");
+  };
+
   return (
     <MobileLayout
       title="Nutrition"
@@ -197,7 +212,7 @@ const Nutrition = () => {
       <div className="space-y-6 pb-24">
         {/* AI Order Dialog */}
         <Dialog open={showAiDialog} onOpenChange={setShowAiDialog}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
@@ -218,17 +233,125 @@ const Nutrition = () => {
                   </p>
                 </div>
               </div>
-            ) : aiRecommendations ? (
+            ) : aiMeals.length > 0 ? (
+              <div className="space-y-4">
+                <div className="grid gap-4">
+                  {aiMeals.map((meal, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="overflow-hidden border-2 hover:border-primary/50 transition-colors">
+                        <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 pb-3">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <CardTitle className="text-lg mb-1">{meal.dishName}</CardTitle>
+                              <CardDescription className="text-xs">
+                                {meal.restaurantType}
+                              </CardDescription>
+                            </div>
+                            <Badge variant="secondary" className="ml-2">
+                              <Flame className="w-3 h-3 mr-1" />
+                              {meal.calories} kcal
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-4 space-y-4">
+                          <p className="text-sm text-muted-foreground">{meal.description}</p>
+                          
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="text-center p-2 bg-muted/50 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1">Protein</div>
+                              <div className="font-semibold">{meal.protein}g</div>
+                            </div>
+                            <div className="text-center p-2 bg-muted/50 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1">Carbs</div>
+                              <div className="font-semibold">{meal.carbs}g</div>
+                            </div>
+                            <div className="text-center p-2 bg-muted/50 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1">Fats</div>
+                              <div className="font-semibold">{meal.fats}g</div>
+                            </div>
+                          </div>
+
+                          {meal.reasoning && (
+                            <div className="bg-primary/5 rounded-lg p-3">
+                              <p className="text-xs font-medium text-primary mb-1">Why this meal?</p>
+                              <p className="text-xs text-muted-foreground">{meal.reasoning}</p>
+                            </div>
+                          )}
+
+                          {meal.ingredients && meal.ingredients.length > 0 && (
+                            <div>
+                              <p className="text-xs font-medium mb-2">Main Ingredients:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {meal.ingredients.map((ingredient: string, i: number) => (
+                                  <Badge key={i} variant="outline" className="text-xs">
+                                    {ingredient}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex gap-2 pt-2">
+                            <Button 
+                              onClick={() => handleOrderLieferando(meal.dishName)}
+                              className="flex-1"
+                              size="sm"
+                            >
+                              <ExternalLink className="w-3 h-3 mr-2" />
+                              Order Meal
+                            </Button>
+                            <Button 
+                              onClick={() => handleOrderFlink(meal.ingredients || [])}
+                              variant="outline"
+                              className="flex-1"
+                              size="sm"
+                            >
+                              <ChefHat className="w-3 h-3 mr-2" />
+                              Get Ingredients
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button 
+                    onClick={() => handleOrderLieferando()}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Browse Lieferando
+                  </Button>
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => {
+                      setShowAiDialog(false);
+                      setUserPreferences("");
+                    }}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            ) : aiRawContent ? (
               <div className="space-y-4">
                 <div className="prose prose-sm max-w-none dark:prose-invert">
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {aiRecommendations}
+                    {aiRawContent}
                   </div>
                 </div>
                 
                 <div className="flex gap-2 pt-4 border-t">
                   <Button 
-                    onClick={handleOrderLieferando} 
+                    onClick={() => handleOrderLieferando()}
                     className="flex-1"
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
@@ -356,7 +479,7 @@ const Nutrition = () => {
                 )}
               </Button>
               <Button 
-                onClick={handleOrderLieferando} 
+                onClick={() => handleOrderLieferando()}
                 variant="outline"
                 disabled={aiLoading}
               >
