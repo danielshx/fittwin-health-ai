@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Wind, Play, Pause, RotateCcw } from "lucide-react";
@@ -14,78 +14,85 @@ type BreathingExerciseProps = {
 export function BreathingExercise({ type, duration = 5, onComplete }: BreathingExerciseProps) {
   const [isActive, setIsActive] = useState(false);
   const [phase, setPhase] = useState<"inhale" | "hold" | "exhale" | "pause">("inhale");
+  const [countdown, setCountdown] = useState(5);
   const [timeRemaining, setTimeRemaining] = useState(duration * 60);
   const [cycleCount, setCycleCount] = useState(0);
-  const [phaseTimeLeft, setPhaseTimeLeft] = useState(0);
+  const startTimeRef = useRef<number>(0);
+  const phaseStartRef = useRef<number>(0);
 
   const patterns = {
-    coherent: { inhale: 5, hold: 0, exhale: 5, pause: 0 }, // 5-5 breathing
-    box: { inhale: 4, hold: 4, exhale: 4, pause: 4 }, // Box breathing
-    "478": { inhale: 4, hold: 7, exhale: 8, pause: 0 }, // 4-7-8 breathing
+    coherent: { inhale: 5, hold: 0, exhale: 5, pause: 0 },
+    box: { inhale: 4, hold: 4, exhale: 4, pause: 4 },
+    "478": { inhale: 4, hold: 7, exhale: 8, pause: 0 },
   };
 
   const currentPattern = patterns[type];
+  const currentPhaseDuration = currentPattern[phase];
 
+  // Get next phase
+  const getNextPhase = (current: typeof phase): typeof phase => {
+    if (current === "inhale" && currentPattern.hold > 0) return "hold";
+    if ((current === "inhale" && currentPattern.hold === 0) || current === "hold") return "exhale";
+    if (current === "exhale" && currentPattern.pause > 0) return "pause";
+    return "inhale";
+  };
+
+  // Main timer loop
   useEffect(() => {
     if (!isActive) return;
 
-    // Set initial phase time when phase changes
-    setPhaseTimeLeft(currentPattern[phase]);
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - phaseStartRef.current) / 1000);
+      const remaining = currentPhaseDuration - elapsed;
 
-    const phaseTimer = setTimeout(() => {
-      if (phase === "inhale" && currentPattern.hold > 0) setPhase("hold");
-      else if ((phase === "inhale" && currentPattern.hold === 0) || phase === "hold")
-        setPhase("exhale");
-      else if (phase === "exhale" && currentPattern.pause > 0) setPhase("pause");
-      else {
-        setPhase("inhale");
-        setCycleCount((c) => c + 1);
-      }
-    }, currentPattern[phase] * 1000);
-
-    return () => clearTimeout(phaseTimer);
-  }, [isActive, phase, currentPattern]);
-
-  // Phase countdown timer
-  useEffect(() => {
-    if (!isActive || phaseTimeLeft <= 0) return;
-
-    const phaseCountdown = setInterval(() => {
-      setPhaseTimeLeft((t) => Math.max(0, t - 1));
-    }, 1000);
-
-    return () => clearInterval(phaseCountdown);
-  }, [isActive, phaseTimeLeft]);
-
-  useEffect(() => {
-    if (!isActive || timeRemaining <= 0) return;
-
-    const countdown = setInterval(() => {
-      setTimeRemaining((t) => {
-        if (t <= 1) {
-          setIsActive(false);
-          const durationSeconds = duration * 60;
-          
-          // Save session
-          saveBreathingSession({
-            id: `${type}-${Date.now()}`,
-            type,
-            duration: durationSeconds,
-            completedAt: new Date().toISOString(),
-            cyclesCompleted: cycleCount,
-          });
-          
-          onComplete?.(durationSeconds, cycleCount);
-          return 0;
+      if (remaining > 0) {
+        setCountdown(remaining);
+      } else {
+        // Phase complete, move to next phase
+        const nextPhase = getNextPhase(phase);
+        
+        if (nextPhase === "inhale") {
+          setCycleCount((c) => c + 1);
         }
-        return t - 1;
-      });
-    }, 1000);
+        
+        setPhase(nextPhase);
+        phaseStartRef.current = Date.now();
+        setCountdown(currentPattern[nextPhase]);
+      }
 
-    return () => clearInterval(countdown);
-  }, [isActive, timeRemaining, onComplete]);
+      // Update total time remaining
+      const totalElapsed = Math.floor((now - startTimeRef.current) / 1000);
+      const newTimeRemaining = Math.max(0, duration * 60 - totalElapsed);
+      setTimeRemaining(newTimeRemaining);
+
+      // Complete exercise when time is up
+      if (newTimeRemaining === 0) {
+        setIsActive(false);
+        const durationSeconds = duration * 60;
+        
+        saveBreathingSession({
+          id: `${type}-${Date.now()}`,
+          type,
+          duration: durationSeconds,
+          completedAt: new Date().toISOString(),
+          cyclesCompleted: cycleCount,
+        });
+        
+        onComplete?.(durationSeconds, cycleCount);
+      }
+    }, 100); // Check every 100ms for smooth countdown
+
+    return () => clearInterval(interval);
+  }, [isActive, phase, currentPhaseDuration, duration, type, cycleCount, onComplete, currentPattern]);
 
   const handleToggle = () => {
+    if (!isActive) {
+      // Starting exercise
+      startTimeRef.current = Date.now();
+      phaseStartRef.current = Date.now();
+      setCountdown(currentPhaseDuration);
+    }
     setIsActive(!isActive);
   };
 
@@ -94,7 +101,9 @@ export function BreathingExercise({ type, duration = 5, onComplete }: BreathingE
     setPhase("inhale");
     setTimeRemaining(duration * 60);
     setCycleCount(0);
-    setPhaseTimeLeft(0);
+    setCountdown(currentPattern.inhale);
+    startTimeRef.current = 0;
+    phaseStartRef.current = 0;
   };
 
   const getPhaseInstructions = () => {
@@ -138,19 +147,19 @@ export function BreathingExercise({ type, duration = 5, onComplete }: BreathingE
               className="relative"
             >
               <motion.div
-                className="w-40 h-40 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-4 border-primary/30"
+                className="w-48 h-48 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-4 border-primary/30"
                 animate={{
-                  scale: phase === "inhale" ? 1.3 : phase === "exhale" ? 0.7 : 1,
+                  scale: phase === "inhale" ? 1.2 : phase === "exhale" ? 0.8 : 1,
                 }}
                 transition={{ 
-                  duration: currentPattern[phase],
+                  duration: currentPhaseDuration,
                   ease: "linear"
                 }}
               >
                 <div className="text-center">
-                  <p className="text-2xl font-bold mb-1 text-foreground">{getPhaseInstructions()}</p>
-                  <p className="text-5xl font-bold text-primary">
-                    {isActive ? phaseTimeLeft : currentPattern[phase]}
+                  <p className="text-xl font-bold mb-2 text-foreground">{getPhaseInstructions()}</p>
+                  <p className="text-6xl font-bold text-primary mb-1">
+                    {countdown}
                   </p>
                   <p className="text-sm text-muted-foreground">seconds</p>
                 </div>
